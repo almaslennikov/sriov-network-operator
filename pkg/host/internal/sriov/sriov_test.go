@@ -13,6 +13,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
+	infinibandMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/infiniband/mock"
 	dputilsMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/dputils/mock"
 	netlinkMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink/mock"
 	hostMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/mock"
@@ -29,8 +30,8 @@ var _ = Describe("SRIOV", func() {
 		dputilsLibMock   *dputilsMockPkg.MockDPUtilsLib
 		hostMock         *hostMockPkg.MockHostManagerInterface
 		storeManagerMode *hostStoreMockPkg.MockManagerInterface
-
-		testCtrl *gomock.Controller
+		infinibandMock   *infinibandMockPkg.MockInfinibandInterface
+		testCtrl         *gomock.Controller
 
 		testError = fmt.Errorf("test")
 	)
@@ -40,8 +41,9 @@ var _ = Describe("SRIOV", func() {
 		dputilsLibMock = dputilsMockPkg.NewMockDPUtilsLib(testCtrl)
 		hostMock = hostMockPkg.NewMockHostManagerInterface(testCtrl)
 		storeManagerMode = hostStoreMockPkg.NewMockManagerInterface(testCtrl)
+		infinibandMock = infinibandMockPkg.NewMockInfinibandInterface(testCtrl)
 
-		s = New(nil, hostMock, hostMock, hostMock, hostMock, nil, netlinkLibMock, dputilsLibMock)
+		s = New(nil, hostMock, hostMock, hostMock, hostMock, infinibandMock, netlinkLibMock, dputilsLibMock)
 	})
 
 	AfterEach(func() {
@@ -191,16 +193,13 @@ var _ = Describe("SRIOV", func() {
 			pfLinkMock.EXPECT().Attrs().Return(&netlink.LinkAttrs{OperState: netlink.OperDown})
 			netlinkLibMock.EXPECT().LinkSetUp(pfLinkMock).Return(nil)
 
-			dputilsLibMock.EXPECT().GetVFID("0000:d8:00.2").Return(0, nil).Times(2)
-			hostMock.EXPECT().Unbind("0000:d8:00.2").Return(nil)
+			dputilsLibMock.EXPECT().GetVFID("0000:d8:00.2").Return(0, nil).Times(1)
 			hostMock.EXPECT().HasDriver("0000:d8:00.2").Return(true, "test").Times(2)
 			hostMock.EXPECT().UnbindDriverIfNeeded("0000:d8:00.2", true).Return(nil)
 			hostMock.EXPECT().BindDefaultDriver("0000:d8:00.2").Return(nil)
 			hostMock.EXPECT().SetNetdevMTU("0000:d8:00.2", 2000).Return(nil)
-			vf0LinkMock := netlinkMockPkg.NewMockLink(testCtrl)
-			netlinkLibMock.EXPECT().LinkSetVfNodeGUID(vf0LinkMock, 0, gomock.Any()).Return(nil)
-			netlinkLibMock.EXPECT().LinkSetVfPortGUID(vf0LinkMock, 0, gomock.Any()).Return(nil)
 			netlinkLibMock.EXPECT().LinkList().Return(nil, nil).AnyTimes()
+			infinibandMock.EXPECT().ConfigureVfGUID(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
 
 			storeManagerMode.EXPECT().SaveLastPfAppliedStatus(gomock.Any()).Return(nil)
 
