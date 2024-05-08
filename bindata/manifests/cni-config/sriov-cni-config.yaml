@@ -7,7 +7,7 @@ metadata:
     k8s.v1.cni.cncf.io/resourceName: {{.SriovCniResourceName}}
 spec:
   config: '{
-  "cniVersion":"1.0.0",
+  "cniVersion":"0.3.1",
   "name":"{{.SriovNetworkName}}",
 {{- if .MetaPluginsConfigured -}}
   "plugins": [
