@@ -336,7 +336,7 @@ func (s *sriov) configSriovPFDevice(iface *sriovnetworkv1.Interface) error {
 		return err
 	}
 	// set PF mtu
-	if iface.Mtu > 0 && iface.Mtu > s.networkHelper.GetNetdevMTU(iface.PciAddress) {
+	if iface.Mtu > 0 && iface.Mtu != s.networkHelper.GetNetdevMTU(iface.PciAddress) {
 		err = s.networkHelper.SetNetdevMTU(iface.PciAddress, iface.Mtu)
 		if err != nil {
 			log.Log.Error(err, "configSriovPFDevice(): fail to set mtu for PF", "device", iface.PciAddress)
