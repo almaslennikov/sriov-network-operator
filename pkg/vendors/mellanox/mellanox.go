@@ -258,7 +258,7 @@ func HandleTotalVfs(fwCurrent, fwNext, attrs *MlxNic, ifaceSpec sriovnetworkv1.I
 	totalVfs = ifaceSpec.NumVfs
 	// Check if the other port is changing the number of VF
 	if isDualPort {
-		otherIfaceSpec := getOtherPortSpec(ifaceSpec.PciAddress, mellanoxNicsSpec)
+		otherIfaceSpec := GetOtherPortSpec(ifaceSpec.PciAddress, mellanoxNicsSpec)
 		if otherIfaceSpec != nil {
 			if otherIfaceSpec.NumVfs > totalVfs {
 				totalVfs = otherIfaceSpec.NumVfs
@@ -412,7 +412,7 @@ func isLinkTypeRequireChange(iface sriovnetworkv1.Interface, ifaceStatus sriovne
 	return false, nil
 }
 
-func getOtherPortSpec(pciAddress string, mellanoxNicsSpec map[string]sriovnetworkv1.Interface) *sriovnetworkv1.Interface {
+func GetOtherPortSpec(pciAddress string, mellanoxNicsSpec map[string]sriovnetworkv1.Interface) *sriovnetworkv1.Interface {
 	log.Log.Info("mellanox-plugin getOtherPortSpec()", "pciAddress", pciAddress)
 	pciAddrPrefix := GetPciAddressPrefix(pciAddress)
 	pciAddrSuffix := pciAddress[len(pciAddrPrefix):]
