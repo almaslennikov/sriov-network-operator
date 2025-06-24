@@ -206,6 +206,13 @@ func (p *MellanoxPlugin) Apply() error {
 		return err
 	}
 	if vars.FeatureGate.IsEnabled(consts.MellanoxFirmwareResetFeatureGate) {
+		for _, pciAddress := range pciAddressesToReset {
+			err := p.helpers.SetSriovNumVfs(pciAddress, 0)
+			if err != nil {
+				log.Log.Error(err, "failed to set SR-IOV number of VFs to 0 before firmware reset", "pciAddress", pciAddress)
+				return err
+			}
+		}
 		return p.helpers.MlxResetFW(pciAddressesToReset)
 	}
 	return nil
