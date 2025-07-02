@@ -1,0 +1,18 @@
+# This file is an example of fork-sync-reusable usage. Please, adjust the configuration for the specific repo.
+name: Fork Sync
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # nightly
+  workflow_dispatch:   # enable manual trigger
+
+jobs:
+  call-reusable-sync-fork-workflow:
+    uses: Mellanox/cloud-orchestration-reusable-workflows/.github/workflows/fork-sync-reusable.yml@almaslennikov-patch-1
+    with:
+      upstream-owner: k8snetworkplumbingwg
+      default-branch: master
+      service-account-username: almaslennikov
+      service-account-email: amaslennikov@nvidia.com
+    secrets:
+      gh_token: ${{ secrets.GH_TOKEN }}
